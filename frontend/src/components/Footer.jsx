@@ -1,9 +1,13 @@
-import { GraduationCap, Phone, Mail, MapPin } from 'lucide-react'
+import { Phone, Mail, MapPin } from 'lucide-react'
 import { Link } from 'react-router-dom'
-
+import { FaInstagram, FaYoutube } from "react-icons/fa";
 const quickLinks = [
   { label: 'Home', href: '/' },
   { label: 'About Us', href: '/about' },
+  { label: 'Hostel Life', href: '/hostel' },
+  { label: 'Transport', href: '/transport' },
+  
+  
   // { label: 'Academics', href: '/#academics' },
   { label: 'Facilities', href: '/facilities' },
   { label: 'Fee Structure', href: '/fee-structure' },
@@ -20,30 +24,45 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-14">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
           <div>
-            <div className="flex items-center gap-2.5 mb-5">
-              <div className="w-10 h-10 bg-gold-500 rounded-xl flex items-center justify-center">
-                <GraduationCap className="w-6 h-6 text-navy-900" />
-              </div>
-              <div className="leading-tight">
-                <span className="font-heading font-bold text-white text-lg block">KRR BrightMinds</span>
-                <span className="text-[10px] text-navy-400 tracking-wider uppercase">School of Excellence</span>
-              </div>
+            <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="w-15 h-15 white rounded-xl flex items-center justify-center group-hover:bg-navy-600 transition-colors">
+              <img
+                  src="/logo.png"
+                  alt="KRR BrightMinds School Logo"
+                  className="w-full h-auto object-contain aspect-[4/3]"
+                />
             </div>
+            <div className="leading-tight">
+              <span className="font-heading font-bold text-white text-lg block">KRR BrightMinds</span>
+              <span className="text-[10px] text-navy-500 tracking-wider uppercase">School of Excellence</span>
+            </div>
+          </Link>
             <p className="text-navy-400 text-sm leading-relaxed mb-5">
               Building bright futures through quality education since 2008.
               CBSE-affiliated school offering safe, modern, and value-based
               learning in rural Andhra Pradesh.
             </p>
             <div className="flex gap-3">
-              <a href="#" className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-gold-500 hover:text-navy-900 transition-all text-sm font-bold">
+              {/* <a href="#" className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-gold-500 hover:text-navy-900 transition-all text-sm font-bold">
                 f
-              </a>
-              <a href="#" className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-gold-500 hover:text-navy-900 transition-all text-sm font-bold">
-                in
-              </a>
-              <a href="#" className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-gold-500 hover:text-navy-900 transition-all text-sm font-bold">
-                YT
-              </a>
+              </a> */}
+              <a
+  href="https://www.instagram.com/krrbrightmindsschool"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-gold-500 hover:text-navy-900 transition-all"
+>
+  <FaInstagram className="text-lg" />
+</a>
+
+<a
+  href="https://youtube.com/@krrgroupofinstitutions?si=w05OEihdV6qdke-Y"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-gold-500 hover:text-navy-900 transition-all"
+>
+  <FaYoutube className="text-lg" />
+</a>
             </div>
           </div>
 

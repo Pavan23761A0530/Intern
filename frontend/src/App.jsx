@@ -23,7 +23,12 @@ import FeePage from "./components/pages/Fee";
 import Contact from "./components/pages/Contact";
 import Apply from "./components/pages/Apply";
 import TransportDashboard from "./components/Transport/TransportDashboard";
-
+import BackToTop from "./components/BackToTop";
+import HostelPage from "./components/pages/hostel/HostelPage";
+import HostelApplyPage from "./components/pages/hostel/HostelApply";
+import HostelFeePage from "./components/pages/hostel/HostelFee";
+import ScrollToTop from "./components/ScrollToTop";
+import HostelGalleryPage from "./components/pages/hostel/HostelGallery";
 function HomePage() {
   return (
     <>
@@ -46,7 +51,9 @@ function HomePage() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+   <BrowserRouter>
+      <ScrollToTop />
+      <BackToTop />
       <div className="min-h-screen bg-white font-body text-navy-800">
         <AnnouncementBar />
         <Navbar />
@@ -59,6 +66,11 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/apply" element={<Apply />} />
           <Route path="/transport" element={<TransportDashboard />} />
+          <Route path="/hostel-fee" element={<HostelFeePage />} />
+          <Route path="/hostel-gallery" element={<HostelGalleryPage />} />
+          <Route path="/hostel-apply" element={<HostelApplyPage />} />
+          <Route path="/hostel" element={<HostelPage />} />
+          
         </Routes>
 
         <Footer />

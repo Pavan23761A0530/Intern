@@ -17,7 +17,8 @@ import {
   ArrowRight,
   Coffee,
   Shield,
-  Clock
+  Clock,
+  FlaskConical
 } from 'lucide-react'
 
 const FacilitiesPage = () => {
@@ -157,10 +158,10 @@ const FacilitiesPage = () => {
                 desc: "Modern computer laboratories equipped with updated systems and internet facilities to help students develop digital skills."
               },
               {
-                title: "Medical Care",
-                icon: HeartPulse,
+                title: "Science Labs",
+                icon: FlaskConical,
                 image: "/work together.png",
-                desc: "Basic medical care and health support facilities to ensure student safety, wellness, and immediate attention during emergencies."
+                desc: "A well-equipped science laboratory with state-of-the-art equipment and tools to support students in their scientific investigations and experiments."
               }
             ].map((facility, index) => (
               <div 
@@ -237,10 +238,10 @@ const FacilitiesPage = () => {
                     "Safe and comfortable hostel facilities with hygienic food, study support, and a student-friendly environment."
                   </p>
                   <Link 
-                    to="/#contact" 
+                    to="/hostel" 
                     className="inline-flex items-center gap-2 px-8 py-4 bg-gold-500 hover:bg-gold-600 text-navy-900 font-bold rounded-xl transition-all"
                   >
-                    Enquire About Hostel
+                    Explore Hostel Life
                     <ArrowRight className="w-5 h-5" />
                   </Link>
                 </div>

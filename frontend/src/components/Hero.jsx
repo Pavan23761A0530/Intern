@@ -74,12 +74,7 @@ export default function Hero() {
               >
                 Apply for Admission
               </Link>
-              <a
-                href="/#contact"
-                className="inline-flex items-center justify-center px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl border border-white/20 hover:border-white/40 transition-all duration-200 text-lg backdrop-blur-sm"
-              >
-                Schedule Campus Visit
-              </a>
+             
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
