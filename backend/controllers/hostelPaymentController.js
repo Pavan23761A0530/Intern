@@ -270,6 +270,40 @@ exports.verifyHostelPayment = async (req, res) => {
     session.endSession();
 
     // ===============================
+    // EMIT SOCKET EVENT FOR REAL-TIME UPDATE
+    // ===============================
+    const io = req.app.get('io');
+    if (io) {
+      // Get updated hostel stats
+      const hostelStats = await HostelRoom.aggregate([
+        {
+          $group: {
+            _id: { hostelType: "$hostelType", roomType: "$roomType" },
+            totalBeds: { $sum: "$totalBeds" },
+            occupiedBeds: { $sum: "$occupiedBeds" },
+            availableBeds: { $sum: "$availableBeds" },
+            roomCount: { $sum: 1 }
+          }
+        }
+      ]);
+
+      const formattedHostelStats = {
+        boys: { ac: 0, nonAc: 0 },
+        girls: { ac: 0, nonAc: 0 }
+      };
+      hostelStats.forEach(stat => {
+        const hostelTypeLower = stat._id.hostelType.toLowerCase();
+        const roomTypeLower = stat._id.roomType.toLowerCase();
+        const key = roomTypeLower.includes('non') ? 'nonAc' : 'ac';
+        if (formattedHostelStats[hostelTypeLower]) {
+          formattedHostelStats[hostelTypeLower][key] = stat.availableBeds;
+        }
+      });
+
+      io.emit('hostelAvailabilityUpdate', formattedHostelStats);
+    }
+
+    // ===============================
     // SUCCESS RESPONSE
     // ===============================
 

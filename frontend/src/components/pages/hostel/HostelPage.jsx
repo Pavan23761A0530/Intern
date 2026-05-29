@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaInstagram, FaYoutube } from "react-icons/fa";
+import { io } from "socket.io-client";
 import {
   ShieldCheck,
   BedDouble,
@@ -34,6 +35,24 @@ const HostelPage = () => {
     boys: { ac: 0, nonAc: 0 },
     girls: { ac: 0, nonAc: 0 }
   });
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    const newSocket = io(import.meta.env.VITE_API_URL);
+    setSocket(newSocket);
+
+    newSocket.on('initialStats', (data) => {
+      setAvailability(data.hostel);
+    });
+
+    newSocket.on('hostelAvailabilityUpdate', (data) => {
+      setAvailability(data);
+    });
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     const fetchAvailability = async () => {

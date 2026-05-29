@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const dns = require('dns');
 const path = require('path');
+const http = require('http');
+const { Server } = require('socket.io');
 
 // Fix for querySrv ECONNREFUSED by setting DNS servers manually
 dns.setServers(['8.8.8.8', '8.8.4.4']);
@@ -34,6 +36,19 @@ if (missingVars.length > 0) {
 console.log('✅ All required environment variables loaded successfully');
 
 const app = express();
+const server = http.createServer(app);
+
+// Initialize Socket.io
+const io = new Server(server, {
+  cors: {
+    origin: [
+      process.env.FRONTEND_URL,
+      'http://localhost:5173',
+      'http://localhost:3000'
+    ],
+    credentials: true
+  }
+});
 
 // Body parser
 app.use(express.json());
@@ -42,24 +57,170 @@ app.use(express.json());
 app.use(cors({
   origin: [
     process.env.FRONTEND_URL,
-    "http://localhost:5173",
-    "http://localhost:3000"
+    'http://localhost:5173',
+    'http://localhost:3000'
   ],
   credentials: true
 }));
 
+// Import models for debug APIs and seeding
+const HostelRoom = require('./models/HostelRoom');
+const { Bus, Route, PickupPoint, TransportAssignment, TransportPayment } = require('./models/Transport');
+const { HostelPayment } = require('./models/HostelPayment');
+
+// --- Auto Seed Functions ---
+const seedHostelRooms = async () => {
+  try {
+    const count = await HostelRoom.countDocuments();
+    if (count === 0) {
+      console.log('🌱 Seeding Hostel Rooms...');
+      const rooms = [];
+
+      // Boys Hostel - AC (5 rooms, 4 beds each)
+      for (let i = 1; i <= 5; i++) {
+        rooms.push({
+          roomNumber: `B-AC-${i}`,
+          hostelType: 'boys',
+          roomType: 'ac',
+          totalBeds: 4,
+          occupiedBeds: 0,
+          availableBeds: 4
+        });
+      }
+      // Boys Hostel - Non-AC (5 rooms, 4 beds each)
+      for (let i = 1; i <= 5; i++) {
+        rooms.push({
+          roomNumber: `B-NON-AC-${i}`,
+          hostelType: 'boys',
+          roomType: 'non-ac',
+          totalBeds: 4,
+          occupiedBeds: 0,
+          availableBeds: 4
+        });
+      }
+
+      // Girls Hostel - AC (5 rooms,4 beds each)
+      for (let i = 1; i <=5; i++) {
+        rooms.push({
+          roomNumber: `G-AC-${i}`,
+          hostelType: 'girls',
+          roomType: 'ac',
+          totalBeds: 4,
+          occupiedBeds: 0,
+          availableBeds:4
+        });
+      }
+      // Girls Hostel - Non-AC (5 rooms,4 beds each)
+      for (let i=1; i<=5; i++) {
+        rooms.push({
+          roomNumber: `G-NON-AC-${i}`,
+          hostelType: 'girls',
+          roomType: 'non-ac',
+          totalBeds:4,
+          occupiedBeds:0,
+          availableBeds:4
+        });
+      }
+
+      await HostelRoom.insertMany(rooms);
+      console.log('✅ Hostel Rooms seeded successfully! (20 rooms, 4 beds each)');
+    }
+  } catch (err) {
+    console.error('❌ Error seeding Hostel Rooms:', err.message);
+  }
+};
+
+const seedTransportData = async () => {
+  try {
+    const busCount = await Bus.countDocuments();
+    if (busCount === 0) {
+      console.log('🌱 Seeding Transport Data...');
+      const schoolLocation = { lat: 16.816, lng: 81.233 }; // Tadikalapudi
+      
+      // Helper to generate random coordinates near school
+      const getRandomOffset = (max) => (Math.random() - 0.5) * max;
+
+      const routeConfigs = [
+        { name: 'Eluru Bypass', bus: 'BUS-104', fee: 9000, time: '50 mins', color: '#f87171' },
+        { name: 'Vijayawada City', bus: 'BUS-105', fee: 12000, time: '90 mins', color: '#60a5fa' },
+        { name: 'Nuzvid Town', bus: 'BUS-106', fee: 8000, time: '60 mins', color: '#34d399' },
+        { name: 'Denduluru Junction', bus: 'BUS-107', fee: 7000, time: '40 mins', color: '#fbbf24' },
+        { name: 'Kaikaluru Market', bus: 'BUS-108', fee: 11000, time: '75 mins', color: '#a78bfa' },
+        { name: 'Gudivada Stand', bus: 'BUS-109', fee: 10000, time: '70 mins', color: '#f472b6' },
+        { name: 'Tadikalapudi Local', bus: 'BUS-110', fee: 5000, time: '15 mins', color: '#fb7185' },
+        { name: 'Kamavarapukota Town', bus: 'BUS-111', fee: 6000, time: '25 mins', color: '#2dd4bf' },
+        { name: 'Jangareddygudem Express', bus: 'BUS-112', fee: 9500, time: '55 mins', color: '#fb923c' },
+        { name: 'Chintalapudi Rural', bus: 'BUS-113', fee: 10500, time: '65 mins', color: '#a3e635' },
+        { name: 'Lingapalem Cross', bus: 'BUS-114', fee: 8500, time: '45 mins', color: '#e879f9' },
+        { name: 'Dharmajigudem Route', bus: 'BUS-115', fee: 7500, time: '35 mins', color: '#38bdf8' },
+        { name: 'T.Narasapuram Center', bus: 'BUS-116', fee: 9000, time: '50 mins', color: '#818cf8' },
+        { name: 'Bhimadole Junction', bus: 'BUS-117', fee: 11500, time: '80 mins', color: '#c084fc' },
+        { name: 'Pedavegi Heritage', bus: 'BUS-118', fee: 6500, time: '30 mins', color: '#fbbf24' },
+        { name: 'Akiveedu Bypass', bus: 'BUS-119', fee: 12500, time: '95 mins', color: '#4ade80' },
+        { name: 'Hanuman Junction', bus: 'BUS-120', fee: 11000, time: '75 mins', color: '#f43f5e' }
+      ];
+
+      for (let i = 0; i < routeConfigs.length; i++) {
+        const config = routeConfigs[i];
+        
+        // 1. Create Bus
+        const bus = await Bus.create({
+          busNumber: config.bus,
+          driverName: `Driver ${i + 1}`,
+          driverContact: `+91 9440${100000 + i}`,
+          totalSeats: 40,
+          availableSeats: Math.floor(Math.random() * 30) + 5,
+          currentLocation: { 
+            lat: schoolLocation.lat + getRandomOffset(0.2), 
+            lng: schoolLocation.lng + getRandomOffset(0.2) 
+          }
+        });
+
+        // 2. Create Route
+        const route = await Route.create({
+          routeName: `${config.name} Route`,
+          routeNumber: `R-${config.bus.split('-')[1]}-0${i + 1}`,
+          villagesCovered: [config.name, 'Nearby Village'],
+          timing: { pickup: '07:00 AM', drop: '05:00 PM' },
+          fee: config.fee,
+          estimatedTime: config.time,
+          color: config.color,
+          bus: bus._id,
+          path: [
+            { 
+              lat: schoolLocation.lat + getRandomOffset(0.3), 
+              lng: schoolLocation.lng + getRandomOffset(0.3) 
+            },
+            schoolLocation
+          ]
+        });
+
+        // 3. Create Pickup Point
+        await PickupPoint.create({
+          name: config.name,
+          location: route.path[0],
+          route: route._id
+        });
+      }
+      console.log('✅ Transport Data seeded successfully!');
+    }
+  } catch (err) {
+    console.error('❌ Error seeding Transport Data:', err.message);
+  }
+};
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB Connected Successfully'))
+  .then(async () => {
+    console.log('✅ MongoDB Connected Successfully');
+    // Auto seed data
+    await seedHostelRooms();
+    await seedTransportData();
+  })
   .catch(err => {
     console.error(`❌ Error connecting to MongoDB: ${err.message}`);
     process.exit(1);
   });
-
-// Import models for debug APIs
-const HostelRoom = require('./models/HostelRoom');
-const { Bus, Route, PickupPoint, TransportAssignment, TransportPayment } = require('./models/Transport');
-const { HostelPayment } = require('./models/HostelPayment');
 
 // Routes
 const feeRoutes = require('./routes/feeRoutes');
@@ -144,8 +305,71 @@ app.get('/', (req, res) => {
   res.send('KRR BrightMinds School API is running...');
 });
 
+// Socket.io connection handler
+io.on('connection', (socket) => {
+  console.log('🔌 A user connected:', socket.id);
+
+  // Send initial stats on connection
+  const sendInitialStats = async () => {
+    try {
+      const [hostelStats, transportStats] = await Promise.all([
+        HostelRoom.aggregate([
+          {
+            $group: {
+              _id: { hostelType: "$hostelType", roomType: "$roomType" },
+              totalBeds: { $sum: "$totalBeds" },
+              occupiedBeds: { $sum: "$occupiedBeds" },
+              availableBeds: { $sum: "$availableBeds" },
+              roomCount: { $sum: 1 }
+            }
+          }
+        ]),
+        Promise.all([
+          Bus.countDocuments(),
+          Route.countDocuments(),
+          PickupPoint.countDocuments(),
+          TransportAssignment.countDocuments()
+        ])
+      ]);
+
+      const formattedHostelStats = {
+        boys: { ac: 0, nonAc: 0 },
+        girls: { ac: 0, nonAc: 0 }
+      };
+      hostelStats.forEach(stat => {
+        const hostelTypeLower = stat._id.hostelType.toLowerCase();
+        const roomTypeLower = stat._id.roomType.toLowerCase();
+        const key = roomTypeLower.includes('non') ? 'nonAc' : 'ac';
+        if (formattedHostelStats[hostelTypeLower]) {
+          formattedHostelStats[hostelTypeLower][key] = stat.availableBeds;
+        }
+      });
+
+      socket.emit('initialStats', {
+        hostel: formattedHostelStats,
+        transport: {
+          totalBuses: transportStats[0],
+          activeRoutes: transportStats[1],
+          totalPickupPoints: transportStats[2],
+          studentsUsingTransport: transportStats[3]
+        }
+      });
+    } catch (err) {
+      console.error('❌ Error sending initial stats:', err);
+    }
+  };
+  sendInitialStats();
+
+  socket.on('disconnect', () => {
+    console.log('🔌 User disconnected:', socket.id);
+  });
+});
+
+// Make io available to controllers
+app.set('io', io);
+
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
