@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { API_BASE_URL } from '../../../utils/api';
 import { Link } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -89,7 +90,7 @@ const HostelApplyPage = () => {
   useEffect(() => {
     const fetchAvailability = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/hostel/availability');
+        const response = await fetch('${API_BASE_URL}/api/hostel/availability');
         if (!response.ok) throw new Error('Failed to fetch availability');
         const result = await response.json();
         if (result.success) {
@@ -150,7 +151,7 @@ const HostelApplyPage = () => {
   try {
 
     const response = await fetch(
-      `http://localhost:5000/api/hostel-payments/receipt/${paymentId}`
+      `${API_BASE_URL}/api/hostel-payments/receipt/${paymentId}`
     );
 
     const blob = await response.blob();
@@ -183,7 +184,7 @@ const HostelApplyPage = () => {
 
     try {
       // 1. Submit Application
-      const appResponse = await fetch('http://localhost:5000/api/hostel-applications', {
+      const appResponse = await fetch('${API_BASE_URL}/api/hostel-applications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -206,7 +207,7 @@ const HostelApplyPage = () => {
       const applicationId = appResult.data._id;
 
       // 2. Create Razorpay Order
-      const orderResponse = await fetch('http://localhost:5000/api/hostel-payments/create-order', {
+      const orderResponse = await fetch('${API_BASE_URL}/api/hostel-payments/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ applicationId })
@@ -228,7 +229,7 @@ const HostelApplyPage = () => {
         handler: async (response) => {
           try {
             // 4. Verify Payment
-            const verifyResponse = await fetch('http://localhost:5000/api/hostel-payments/verify', {
+            const verifyResponse = await fetch('${API_BASE_URL}/api/hostel-payments/verify', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(response)

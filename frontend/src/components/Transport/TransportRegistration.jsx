@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../utils/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, IdCard, GraduationCap, MapPin, Phone, Loader2, Navigation, Clock, Bus, CheckCircle2, CreditCard, Receipt, IndianRupee } from 'lucide-react';
 import axios from 'axios';
@@ -51,7 +52,7 @@ const TransportRegistration = ({ nearestInfo, searchedLocation, onRegisterSucces
           };
           currentSearchedLocation = locationObj;
 
-          const detectRes = await axios.post('http://localhost:5000/api/transport/find-nearest', { lat, lng });
+          const detectRes = await axios.post('${API_BASE_URL}/api/transport/find-nearest', { lat, lng });
           if (detectRes.data.success) {
             currentNearestInfo = detectRes.data;
             // Notify parent component about the detected location to update map/stats
@@ -75,7 +76,7 @@ const TransportRegistration = ({ nearestInfo, searchedLocation, onRegisterSucces
       }
 
       // 2. Proceed with registration
-      const response = await axios.post('http://localhost:5000/api/transport/register', {
+      const response = await axios.post('${API_BASE_URL}/api/transport/register', {
         ...formData,
         location: currentSearchedLocation,
         pickupPointId: currentNearestInfo.nearestPoint._id,
@@ -117,7 +118,7 @@ const TransportRegistration = ({ nearestInfo, searchedLocation, onRegisterSucces
       }
 
       // 1. Create Order
-      const orderRes = await axios.post('http://localhost:5000/api/transport/create-order', {
+      const orderRes = await axios.post('${API_BASE_URL}/api/transport/create-order', {
         assignmentId: registeredAssignment._id,
         amount: registeredAssignment.fee
       });
@@ -136,7 +137,7 @@ const TransportRegistration = ({ nearestInfo, searchedLocation, onRegisterSucces
         order_id: order.id,
         handler: async (response) => {
           try {
-            const verifyRes = await axios.post('http://localhost:5000/api/transport/verify-payment', {
+            const verifyRes = await axios.post('${API_BASE_URL}/api/transport/verify-payment', {
               ...response,
               assignmentId: registeredAssignment._id
             });
@@ -147,7 +148,7 @@ const TransportRegistration = ({ nearestInfo, searchedLocation, onRegisterSucces
               // NEW: Trigger professional PDF download from backend
               const paymentId = verifyRes.data.paymentId || verifyRes.data.assignment?._id; // Fallback logic
               if (paymentId) {
-                window.location.href = `http://localhost:5000/api/transport/receipt/${paymentId}`;
+                window.location.href = `${API_BASE_URL}/api/transport/receipt/${paymentId}`;
               }
               
               onRegisterSuccess(verifyRes.data.assignment);

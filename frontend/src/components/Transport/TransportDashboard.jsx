@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { API_BASE_URL } from '../../utils/api';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast, Toaster } from 'react-hot-toast';
@@ -38,7 +39,7 @@ const TransportDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/transport/dashboard');
+      const response = await axios.get('${API_BASE_URL}/api/transport/dashboard');
       if (response.data.success) {
         setStats(response.data.stats);
         setBuses(response.data.buses);
@@ -65,7 +66,7 @@ const TransportDashboard = () => {
 
     setFindingRoute(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/transport/find-nearest', { lat, lng });
+      const response = await axios.post('${API_BASE_URL}/api/transport/find-nearest', { lat, lng });
       if (response.data.success) {
         setNearestInfo(response.data);
         setSelectedRouteId(response.data.nearestPoint.route._id);
@@ -88,7 +89,7 @@ const TransportDashboard = () => {
 
   const handleDownloadReceipt = async () => {
     if (finalAssignment && finalAssignment.paymentId) {
-      window.location.href = `http://localhost:5000/api/transport/receipt/${finalAssignment.paymentId}`;
+      window.location.href = `${API_BASE_URL}/api/transport/receipt/${finalAssignment.paymentId}`;
       return;
     }
 

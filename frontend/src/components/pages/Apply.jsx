@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react';
+import { API_BASE_URL } from '../../utils/api';
 import { Link } from 'react-router-dom'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
@@ -156,7 +157,7 @@ const Apply = () => {
 
     try {
       // 1. Create Order on Backend
-      const orderRes = await fetch('http://localhost:5000/api/payments/order', {
+      const orderRes = await fetch('${API_BASE_URL}/api/payments/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -182,7 +183,7 @@ const Apply = () => {
         order_id: orderData.data.id,
         handler: async function (response) {
           // 3. Verify Payment on Backend
-          const verifyRes = await fetch('http://localhost:5000/api/payments/verify', {
+          const verifyRes = await fetch('${API_BASE_URL}/api/payments/verify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -268,7 +269,7 @@ const Apply = () => {
       }
       
       try {
-        const response = await fetch('http://localhost:5000/api/applications/submit', {
+        const response = await fetch('${API_BASE_URL}/api/applications/submit', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
