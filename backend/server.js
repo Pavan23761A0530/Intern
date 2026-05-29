@@ -209,18 +209,19 @@ const seedTransportData = async () => {
   }
 };
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(async () => {
+// Connect to MongoDB AFTER starting server to avoid port timeout
+const startMongoDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
     console.log('✅ MongoDB Connected Successfully');
     // Auto seed data
     await seedHostelRooms();
     await seedTransportData();
-  })
-  .catch(err => {
+  } catch (err) {
     console.error(`❌ Error connecting to MongoDB: ${err.message}`);
     process.exit(1);
-  });
+  }
+};
 
 // Routes
 const feeRoutes = require('./routes/feeRoutes');
@@ -370,6 +371,8 @@ app.set('io', io);
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on port ${PORT}`);
+  // Start MongoDB connection after server is listening
+  startMongoDB();
 });
