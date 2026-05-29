@@ -66,7 +66,7 @@ app.use(cors({
 // Import models for debug APIs and seeding
 const HostelRoom = require('./models/HostelRoom');
 const { Bus, Route, PickupPoint, TransportAssignment, TransportPayment } = require('./models/Transport');
-const { HostelPayment } = require('./models/HostelPayment');
+const HostelPayment = require('./models/HostelPayment');
 
 // --- Auto Seed Functions ---
 const seedHostelRooms = async () => {
