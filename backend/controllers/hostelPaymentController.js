@@ -18,8 +18,10 @@ const razorpay = new Razorpay({
 // ======================================================
 
 exports.createHostelOrder = async (req, res) => {
+  console.log('[HostelPayment] createHostelOrder called');
   try {
     const { applicationId } = req.body;
+    console.log('[HostelPayment] Application ID:', applicationId);
 
     if (!applicationId) {
       return res.status(400).json({
@@ -29,6 +31,7 @@ exports.createHostelOrder = async (req, res) => {
     }
 
     const application = await HostelApplication.findById(applicationId);
+    console.log('[HostelPayment] Found application:', application);
 
     if (!application) {
       return res.status(404).json({
@@ -59,6 +62,7 @@ exports.createHostelOrder = async (req, res) => {
       hostelFee +
       admissionFee +
       securityDeposit;
+    console.log('[HostelPayment] Total amount:', totalAmount);
 
     // ===============================
     // CREATE ORDER
@@ -71,6 +75,7 @@ exports.createHostelOrder = async (req, res) => {
     };
 
     const order = await razorpay.orders.create(options);
+    console.log('[HostelPayment] Razorpay order created:', order.id);
 
     // ===============================
     // SAVE PAYMENT
@@ -88,6 +93,7 @@ exports.createHostelOrder = async (req, res) => {
       }
     });
 
+    console.log('[HostelPayment] Payment saved');
     return res.status(200).json({
       success: true,
       orderId: order.id,
@@ -96,7 +102,7 @@ exports.createHostelOrder = async (req, res) => {
       key: process.env.RAZORPAY_KEY_ID
     });
   } catch (err) {
-    console.error(err);
+    console.error('[HostelPayment] createHostelOrder error:', err);
     return res.status(500).json({
       success: false,
       error: err.message
@@ -109,6 +115,7 @@ exports.createHostelOrder = async (req, res) => {
 // ======================================================
 
 exports.verifyHostelPayment = async (req, res) => {
+  console.log('[HostelPayment] verifyHostelPayment called');
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -118,6 +125,7 @@ exports.verifyHostelPayment = async (req, res) => {
       razorpay_payment_id,
       razorpay_signature
     } = req.body;
+    console.log('[HostelPayment] Payment details:', { razorpay_order_id, razorpay_payment_id });
 
     // ===============================
     // VALIDATION

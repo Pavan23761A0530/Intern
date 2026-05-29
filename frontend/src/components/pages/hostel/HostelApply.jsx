@@ -88,15 +88,20 @@ const HostelApplyPage = () => {
 
   useEffect(() => {
     const fetchAvailability = async () => {
+      const url = `${import.meta.env.VITE_API_URL}/api/hostel/availability`;
+      console.log('[HostelApply] Fetching availability from:', url);
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/hostel/availability`);
+        const response = await fetch(url);
+        console.log('[HostelApply] Response status:', response.status);
         if (!response.ok) throw new Error('Failed to fetch availability');
         const result = await response.json();
+        console.log('[HostelApply] Response data:', result);
         if (result.success) {
+          console.log('[HostelApply] Updating availability state:', result.data);
           setAvailability(result.data);
         }
       } catch (error) {
-        console.error('Error fetching availability:', error);
+        console.error('[HostelApply] Error fetching availability:', error);
       }
     };
     fetchAvailability();

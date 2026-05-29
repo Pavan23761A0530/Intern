@@ -30,11 +30,23 @@ const deg2rad = (deg) => {
 // @desc    Get all transport data for dashboard
 // @route   GET /api/transport/dashboard
 exports.getTransportDashboard = async (req, res) => {
+  console.log('[TransportController] getTransportDashboard called');
   try {
+    console.log('[MongoDB] Fetching buses...');
     const buses = await Bus.find();
+    console.log('[MongoDB] Buses found:', buses.length);
+
+    console.log('[MongoDB] Fetching routes...');
     const routes = await Route.find().populate('bus');
+    console.log('[MongoDB] Routes found:', routes.length);
+
+    console.log('[MongoDB] Fetching pickup points...');
     const pickupPoints = await PickupPoint.find().populate('route');
+    console.log('[MongoDB] Pickup points found:', pickupPoints.length);
+
+    console.log('[MongoDB] Fetching assignments...');
     const assignments = await TransportAssignment.find();
+    console.log('[MongoDB] Assignments found:', assignments.length);
 
     const stats = {
       totalBuses: buses.length,
@@ -44,6 +56,7 @@ exports.getTransportDashboard = async (req, res) => {
       studentsUsingTransport: assignments.length
     };
 
+    console.log('[Response] Sending response:', { success: true, stats, busesCount: buses.length, routesCount: routes.length, pickupPointsCount: pickupPoints.length });
     res.status(200).json({
       success: true,
       stats,
@@ -52,7 +65,7 @@ exports.getTransportDashboard = async (req, res) => {
       pickupPoints
     });
   } catch (error) {
-    console.error('Dashboard error:', error);
+    console.error('[TransportController] Dashboard error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

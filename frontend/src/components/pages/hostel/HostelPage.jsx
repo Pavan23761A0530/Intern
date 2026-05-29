@@ -39,14 +39,25 @@ const HostelPage = () => {
 
   useEffect(() => {
     const newSocket = io(import.meta.env.VITE_API_URL);
+    console.log('[HostelPage] Connecting to socket:', import.meta.env.VITE_API_URL);
     setSocket(newSocket);
 
     newSocket.on('initialStats', (data) => {
+      console.log('[HostelPage] Received initialStats:', data);
       setAvailability(data.hostel);
     });
 
     newSocket.on('hostelAvailabilityUpdate', (data) => {
+      console.log('[HostelPage] Received hostelAvailabilityUpdate:', data);
       setAvailability(data);
+    });
+
+    newSocket.on('connect', () => {
+      console.log('[HostelPage] Socket connected');
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log('[HostelPage] Socket disconnected');
     });
 
     return () => {
@@ -56,15 +67,20 @@ const HostelPage = () => {
 
   useEffect(() => {
     const fetchAvailability = async () => {
+      const url = `${import.meta.env.VITE_API_URL}/api/hostel/availability`;
+      console.log('[HostelPage] Fetching availability from:', url);
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/hostel/availability`);
+        const response = await fetch(url);
+        console.log('[HostelPage] Response status:', response.status);
         if (!response.ok) throw new Error('Failed to fetch availability');
         const result = await response.json();
+        console.log('[HostelPage] Response data:', result);
         if (result.success) {
+          console.log('[HostelPage] Updating availability state:', result.data);
           setAvailability(result.data);
         }
       } catch (error) {
-        console.error('Error fetching availability:', error);
+        console.error('[HostelPage] Error fetching availability:', error);
       }
     };
     fetchAvailability();

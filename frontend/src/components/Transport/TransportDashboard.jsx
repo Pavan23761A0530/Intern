@@ -52,16 +52,22 @@ const TransportDashboard = () => {
   }, []);
 
   const fetchDashboardData = async () => {
+    const url = `${import.meta.env.VITE_API_URL}/api/transport/dashboard`;
+    console.log('[TransportDashboard] Fetching dashboard data from:', url);
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/transport/dashboard`);
+      const response = await axios.get(url);
+      console.log('[TransportDashboard] Response received:', response.data);
       if (response.data.success) {
+        console.log('[TransportDashboard] Updating state with stats:', response.data.stats);
         setStats(response.data.stats);
         setBuses(response.data.buses);
         setRoutes(response.data.routes);
         setPickupPoints(response.data.pickupPoints);
+      } else {
+        console.error('[TransportDashboard] API returned success: false');
       }
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error('[TransportDashboard] Error fetching dashboard data:', error);
       toast.error('Failed to load transport data');
     } finally {
       setLoading(false);

@@ -29,7 +29,9 @@ exports.getHostelRooms = async (req, res) => {
 // @route   GET /api/hostel/stats
 // @access  Public
 exports.getHostelStats = async (req, res) => {
+  console.log('[HostelController] getHostelStats called');
   try {
+    console.log('[MongoDB] Running aggregation for hostel stats...');
     const stats = await HostelRoom.aggregate([
       {
         $group: {
@@ -52,6 +54,7 @@ exports.getHostelStats = async (req, res) => {
         }
       }
     ]);
+    console.log('[MongoDB] Aggregation result:', stats);
 
     // Format stats for easier frontend consumption - match what frontend expects
     const formattedStats = {
@@ -60,6 +63,7 @@ exports.getHostelStats = async (req, res) => {
     };
 
     stats.forEach(stat => {
+      console.log('[HostelController] Processing stat:', stat);
       const hostelTypeLower = stat.hostelType.toLowerCase();
       const roomTypeLower = stat.roomType.toLowerCase();
       const key = roomTypeLower.includes('non') ? 'nonAc' : 'ac';
@@ -69,11 +73,14 @@ exports.getHostelStats = async (req, res) => {
       }
     });
 
+    console.log('[HostelController] Formatted stats:', formattedStats);
+    console.log('[Response] Sending response:', { success: true, data: formattedStats });
     res.status(200).json({
       success: true,
       data: formattedStats
     });
   } catch (err) {
+    console.error('[HostelController] getHostelStats error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 };
