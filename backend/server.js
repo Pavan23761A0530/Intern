@@ -3,21 +3,26 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const dns = require('dns');
+const path = require('path');
 
 // Fix for querySrv ECONNREFUSED by setting DNS servers manually
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
-// Load env vars
-dotenv.config();
+// Load env vars with absolute path
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 // --- Environment variable validation
 const requiredEnvVars = [
   'MONGO_URI',
-  'PORT',
   'RAZORPAY_KEY_ID',
   'RAZORPAY_KEY_SECRET',
   'FRONTEND_URL'
 ];
+
+console.log('🔍 Checking environment variables...');
+console.log('Loaded env vars:', Object.keys(process.env).filter(key => 
+  ['MONGO_URI', 'PORT', 'RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET', 'FRONTEND_URL', 'BACKEND_URL'].includes(key)
+));
 
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
