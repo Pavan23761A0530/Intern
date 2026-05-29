@@ -61,8 +61,8 @@ exports.getHostelStats = async (req, res) => {
 
     stats.forEach(stat => {
       const hostelTypeLower = stat.hostelType.toLowerCase();
-      const roomTypeLower = stat.roomType.toLowerCase().replace(/[^a-z]/g, '');
-      const key = roomTypeLower.includes('ac') ? 'ac' : 'nonAc';
+      const roomTypeLower = stat.roomType.toLowerCase();
+      const key = roomTypeLower.includes('non') ? 'nonAc' : 'ac';
       
       if (formattedStats[hostelTypeLower]) {
         formattedStats[hostelTypeLower][key] = stat.availableBeds;

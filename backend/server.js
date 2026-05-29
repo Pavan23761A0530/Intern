@@ -40,6 +40,7 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/transport', transportRoutes);
 app.use('/api/hostels', hostelRoutes);
+app.use('/api/hostel', hostelRoutes); // For compatibility with frontend's "hostel"
 app.use('/api/hostel-applications', hostelApplicationRoutes);
 app.use('/api/hostel-payments', hostelPaymentRoutes);
 

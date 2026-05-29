@@ -44,7 +44,22 @@ const HostelRoomSchema = new mongoose.Schema({
 // Middleware to automatically update availableBeds before saving
 HostelRoomSchema.pre('save', function(next) {
   this.availableBeds = this.totalBeds - this.occupiedBeds;
-  next();
+  if (typeof next === 'function') {
+    next();
+  }
+});
+
+// Also for updateOne middleware
+HostelRoomSchema.pre('updateOne', function(next) {
+  const update = this.getUpdate();
+  if (update.occupiedBeds !== undefined || update.totalBeds !== undefined) {
+    if (update.$set) {
+      update.$set.availableBeds = (update.$set.totalBeds || this.get('totalBeds')) - (update.$set.occupiedBeds || this.get('occupiedBeds'));
+    }
+  }
+  if (typeof next === 'function') {
+    next();
+  }
 });
 
 module.exports = mongoose.model('HostelRoom', HostelRoomSchema);

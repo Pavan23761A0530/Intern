@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaInstagram, FaYoutube } from "react-icons/fa";
 import {
@@ -30,6 +30,26 @@ import {
 } from "lucide-react";
 
 const HostelPage = () => {
+  const [availability, setAvailability] = useState({
+    boys: { ac: 0, nonAc: 0 },
+    girls: { ac: 0, nonAc: 0 }
+  });
+
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/hostel/availability');
+        if (!response.ok) throw new Error('Failed to fetch availability');
+        const result = await response.json();
+        if (result.success) {
+          setAvailability(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching availability:', error);
+      }
+    };
+    fetchAvailability();
+  }, []);
   const whyChooseUs = [
     {
       icon: ShieldCheck,
@@ -307,14 +327,14 @@ const HostelPage = () => {
                 <p className="text-navy-300 text-sm uppercase tracking-widest mb-1">
                   Boys Hostel Beds
                 </p>
-                <p className="text-2xl font-bold text-gold-400">12 Available</p>
+                <p className="text-2xl font-bold text-gold-400">{availability.boys.ac + availability.boys.nonAc} Available</p>
               </div>
               <div className="w-px h-12 bg-navy-700 hidden sm:block"></div>
               <div>
                 <p className="text-navy-300 text-sm uppercase tracking-widest mb-1">
                   Girls Hostel Beds
                 </p>
-                <p className="text-2xl font-bold text-gold-400">08 Available</p>
+                <p className="text-2xl font-bold text-gold-400">{availability.girls.ac + availability.girls.nonAc} Available</p>
               </div>
             </div>
           </div>
