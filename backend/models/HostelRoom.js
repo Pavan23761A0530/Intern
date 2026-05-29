@@ -10,12 +10,12 @@ const HostelRoomSchema = new mongoose.Schema({
   hostelType: {
     type: String,
     required: [true, 'Please specify hostel type'],
-    enum: ['Boys', 'Girls']
+    enum: ['boys', 'girls']
   },
   roomType: {
     type: String,
     required: [true, 'Please specify room type'],
-    enum: ['AC', 'Non-AC']
+    enum: ['ac', 'non-ac']
   },
   totalBeds: {
     type: Number,

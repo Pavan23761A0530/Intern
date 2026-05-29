@@ -6,8 +6,12 @@ const HostelRoom = require('../models/HostelRoom');
 // @access  Public
 exports.submitApplication = async (req, res) => {
   try {
-    const applicationData = req.body;
+    const applicationData = { ...req.body };
     
+    // Normalize to lowercase for schema consistency
+    if (applicationData.hostelType) applicationData.hostelType = applicationData.hostelType.toLowerCase();
+    if (applicationData.roomType) applicationData.roomType = applicationData.roomType.toLowerCase();
+
     // 1. Check bed availability before applying
     const availableRooms = await HostelRoom.find({
       hostelType: applicationData.hostelType,
