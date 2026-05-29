@@ -1,15 +1,19 @@
 # KRR School Website Deployment Checklist
 
 ## Backend (Render) Environment Variables
+
 - MONGO_URI: MongoDB Atlas connection string
 - RAZORPAY_KEY_ID: Razorpay production key ID
 - RAZORPAY_KEY_SECRET: Razorpay production key secret
 - FRONTEND_URL: Render static site URL (e.g., https://your-frontend.onrender.com)
 
 ## Frontend (Render) Environment Variables
+
 - VITE_API_URL: Render backend URL (e.g., https://your-backend.onrender.com)
+- VITE_RAZORPAY_KEY_ID: Razorpay production key ID (same as RAZORPAY_KEY_ID)
 
 ## Deployment Steps
+
 1. Push all changes to GitHub
 2. Deploy backend to Render
 3. Deploy frontend to Render
@@ -21,6 +25,7 @@
 9. Verify real-time updates via Socket.io
 
 ## Post-Deployment Checks
+
 - [ ] Backend server starts without errors
 - [ ] MongoDB connects successfully
 - [ ] Auto-seeding runs if collections are empty
