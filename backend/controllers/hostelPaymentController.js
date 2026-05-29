@@ -316,7 +316,7 @@ exports.verifyHostelPayment = async (req, res) => {
         studentId: application.studentId,
         roomNumber: allocatedRoom,
         paymentStatus: 'Completed',
-        receiptUrl: `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/hostel-payments/receipt/${razorpay_payment_id}`
+        receiptUrl: `${process.env.BACKEND_URL || 'https://intern-3luz.onrender.com'}/api/hostel-payments/receipt/${razorpay_payment_id}`
       }
     });
   } catch (err) {

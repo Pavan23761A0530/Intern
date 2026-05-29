@@ -214,9 +214,35 @@ const startMongoDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('✅ MongoDB Connected Successfully');
+    
+    // --- Startup Diagnostics ---
+    console.log('📊 Startup Diagnostics:');
+    const hostelRoomCount = await HostelRoom.countDocuments();
+    const busCount = await Bus.countDocuments();
+    const routeCount = await Route.countDocuments();
+    const pickupPointCount = await PickupPoint.countDocuments();
+    const hostelPaymentCount = await HostelPayment.countDocuments();
+    const razorpayKeyStatus = process.env.RAZORPAY_KEY_ID ? '✅ Set' : '❌ Missing';
+    
+    console.log(`  - Hostel Rooms: ${hostelRoomCount}`);
+    console.log(`  - Buses: ${busCount}`);
+    console.log(`  - Routes: ${routeCount}`);
+    console.log(`  - Pickup Points: ${pickupPointCount}`);
+    console.log(`  - Hostel Payments: ${hostelPaymentCount}`);
+    console.log(`  - Razorpay Key ID: ${razorpayKeyStatus}`);
+    
     // Auto seed data
-    await seedHostelRooms();
-    await seedTransportData();
+    if (hostelRoomCount === 0) {
+      await seedHostelRooms();
+    } else {
+      console.log('ℹ️ Hostel Rooms already seeded');
+    }
+    
+    if (busCount === 0) {
+      await seedTransportData();
+    } else {
+      console.log('ℹ️ Transport Data already seeded');
+    }
   } catch (err) {
     console.error(`❌ Error connecting to MongoDB: ${err.message}`);
     process.exit(1);

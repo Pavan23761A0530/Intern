@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { io } from 'socket.io-client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast, Toaster } from 'react-hot-toast';
 import { Loader2, Navigation, Clock, MapPin, User, Phone, CheckCircle2, X, Receipt, Bus, Download } from 'lucide-react';
@@ -29,8 +30,22 @@ const TransportDashboard = () => {
   const [showReceipt, setShowReceipt] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const receiptRef = useRef(null);
+  const [socket, setSocket] = useState(null);
 
   const schoolLocation = { lat: 16.816, lng: 81.233 };
+
+  useEffect(() => {
+    const newSocket = io(import.meta.env.VITE_API_URL);
+    setSocket(newSocket);
+
+    newSocket.on('initialStats', (data) => {
+      setStats(data.transport);
+    });
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     fetchDashboardData();
