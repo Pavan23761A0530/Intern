@@ -8,6 +8,7 @@ const {
 
 router.get('/rooms', getHostelRooms);
 router.get('/stats', getHostelStats);
+router.get('/availability', getHostelStats);
 router.post('/assign', assignStudentToRoom);
 
 module.exports = router;

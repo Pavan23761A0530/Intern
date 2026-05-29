@@ -53,20 +53,20 @@ exports.getHostelStats = async (req, res) => {
       }
     ]);
 
-    // Format stats for easier frontend consumption
+    // Format stats for easier frontend consumption - match what frontend expects
     const formattedStats = {
-      Boys: { AC: {}, NonAC: {} },
-      Girls: { AC: {}, NonAC: {} }
+      boys: { ac: 0, nonAc: 0 },
+      girls: { ac: 0, nonAc: 0 }
     };
 
     stats.forEach(stat => {
-      const type = stat.roomType === 'AC' ? 'AC' : 'NonAC';
-      formattedStats[stat.hostelType][type] = {
-        total: stat.totalBeds,
-        occupied: stat.occupiedBeds,
-        available: stat.availableBeds,
-        rooms: stat.roomCount
-      };
+      const hostelTypeLower = stat.hostelType.toLowerCase();
+      const roomTypeLower = stat.roomType.toLowerCase().replace(/[^a-z]/g, '');
+      const key = roomTypeLower.includes('ac') ? 'ac' : 'nonAc';
+      
+      if (formattedStats[hostelTypeLower]) {
+        formattedStats[hostelTypeLower][key] = stat.availableBeds;
+      }
     });
 
     res.status(200).json({
