@@ -128,7 +128,7 @@ const TransportRegistration = ({ nearestInfo, searchedLocation, onRegisterSucces
 
       // 2. Open Razorpay Popup
       const options = {
-        key: 'rzp_test_Su49SXdZC7fspk', // Updated with actual key from .env
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
         name: "KRR BrightMinds School",
