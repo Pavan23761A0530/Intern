@@ -16,7 +16,14 @@ const app = express();
 app.use(express.json());
 
 // Enable CORS
-app.use(cors());
+app.use(cors({
+  origin: [
+    process.env.FRONTEND_URL,
+    "http://localhost:5173",
+    "http://localhost:3000"
+  ],
+  credentials: true
+}));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)

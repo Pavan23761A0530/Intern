@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../../../utils/api';
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaInstagram, FaYoutube } from "react-icons/fa";
 import {
@@ -39,7 +38,7 @@ const HostelPage = () => {
   useEffect(() => {
     const fetchAvailability = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/hostel/availability`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/hostel/availability`);
         if (!response.ok) throw new Error('Failed to fetch availability');
         const result = await response.json();
         if (result.success) {
