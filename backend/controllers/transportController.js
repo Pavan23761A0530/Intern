@@ -186,16 +186,22 @@ exports.registerTransport = async (req, res) => {
 // @desc    Create Razorpay Order
 // @route   POST /api/transport/create-order
 exports.createTransportOrder = async (req, res) => {
+  console.log('[TransportController] createTransportOrder called');
+  console.log('[TransportController] Request body:', req.body);
   try {
     const { assignmentId, amount } = req.body;
     const assignment = await TransportAssignment.findById(assignmentId);
+    console.log('[TransportController] Found assignment:', assignment);
+    
     if (!assignment) return res.status(404).json({ success: false, message: 'Assignment not found' });
 
+    console.log('[TransportController] Creating Razorpay order with amount:', amount * 100);
     const order = await razorpay.orders.create({
       amount: amount * 100,
       currency: "INR",
       receipt: `rcpt_${assignment.studentId}_${Date.now()}`
     });
+    console.log('[TransportController] Razorpay order created:', order);
 
     await TransportPayment.create({
       studentId: assignment.studentId,
@@ -204,10 +210,11 @@ exports.createTransportOrder = async (req, res) => {
       razorpayOrderId: order.id,
       status: 'created'
     });
+    console.log('[TransportController] TransportPayment created');
 
     res.status(200).json({ success: true, order });
   } catch (error) {
-    console.error('Order creation error:', error);
+    console.error('[TransportController] Order creation error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -215,31 +222,40 @@ exports.createTransportOrder = async (req, res) => {
 // @desc    Verify Razorpay Payment
 // @route   POST /api/transport/verify-payment
 exports.verifyTransportPayment = async (req, res) => {
+  console.log('[TransportController] verifyTransportPayment called');
+  console.log('[TransportController] Request body:', req.body);
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, assignmentId } = req.body;
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(razorpay_order_id + "|" + razorpay_payment_id)
       .digest("hex");
+    console.log('[TransportController] Expected signature:', expectedSignature);
+    console.log('[TransportController] Received signature:', razorpay_signature);
 
     if (expectedSignature === razorpay_signature) {
+      console.log('[TransportController] Signature verified');
       const payment = await TransportPayment.findOneAndUpdate(
         { razorpayOrderId: razorpay_order_id },
         { razorpayPaymentId: razorpay_payment_id, razorpaySignature: razorpay_signature, status: 'captured' },
         { new: true }
       );
+      console.log('[TransportController] Updated TransportPayment:', payment);
 
       const assignment = await TransportAssignment.findById(assignmentId);
+      console.log('[TransportController] Found assignment:', assignment);
       assignment.paidAmount += payment.amount;
       assignment.dueAmount = assignment.fee - assignment.paidAmount;
       assignment.paymentStatus = assignment.dueAmount <= 0 ? 'paid' : 'partial';
       assignment.assignmentStatus = 'active';
       await assignment.save();
+      console.log('[TransportController] Saved assignment');
 
       const bus = await Bus.findById(assignment.bus);
       if (bus && bus.availableSeats > 0) {
         bus.availableSeats -= 1;
         await bus.save();
+        console.log('[TransportController] Updated bus seats');
       }
 
       res.status(200).json({ 
@@ -252,7 +268,7 @@ exports.verifyTransportPayment = async (req, res) => {
       res.status(400).json({ success: false, message: "Invalid signature" });
     }
   } catch (error) {
-    console.error('Verification error:', error);
+    console.error('[TransportController] Verification error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

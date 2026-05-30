@@ -106,25 +106,40 @@ const TransportRegistration = ({ nearestInfo, searchedLocation, onRegisterSucces
   };
 
   const handlePayment = async () => {
-    if (!registeredAssignment) return;
+    console.log('[TransportRegistration] handlePayment called');
+    console.log('[TransportRegistration] Registered Assignment:', registeredAssignment);
+    
+    if (!registeredAssignment) {
+      console.error('[TransportRegistration] No registered assignment');
+      return;
+    }
 
     setPaymentLoading(true);
     try {
+      console.log('[TransportRegistration] Loading Razorpay SDK...');
       const isLoaded = await loadRazorpay();
+      console.log('[TransportRegistration] Razorpay SDK loaded:', isLoaded);
+      
       if (!isLoaded) {
         toast.error('Razorpay SDK failed to load');
         return;
       }
 
       // 1. Create Order
+      console.log('[TransportRegistration] Creating transport order...');
       const orderRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/transport/create-order`, {
         assignmentId: registeredAssignment._id,
         amount: registeredAssignment.fee
       });
+      console.log('[TransportRegistration] Order response:', orderRes.data);
 
       if (!orderRes.data.success) throw new Error('Order creation failed');
 
       const { order } = orderRes.data;
+      console.log('[TransportRegistration] Order details:', order);
+
+      // Log Razorpay key
+      console.log('[TransportRegistration] Razorpay Key (from env):', import.meta.env.VITE_RAZORPAY_KEY_ID);
 
       // 2. Open Razorpay Popup
       const options = {
@@ -135,17 +150,20 @@ const TransportRegistration = ({ nearestInfo, searchedLocation, onRegisterSucces
         description: "Transport Fee Payment",
         order_id: order.id,
         handler: async (response) => {
+          console.log('[TransportRegistration] Razorpay payment success:', response);
           try {
             const verifyRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/transport/verify-payment`, {
               ...response,
               assignmentId: registeredAssignment._id
             });
+            console.log('[TransportRegistration] Verify payment response:', verifyRes.data);
 
             if (verifyRes.data.success) {
               toast.success('Payment successful! Transport assigned.');
               
               // NEW: Trigger professional PDF download from backend
               const paymentId = verifyRes.data.paymentId || verifyRes.data.assignment?._id; // Fallback logic
+              console.log('[TransportRegistration] Downloading receipt for paymentId:', paymentId);
               if (paymentId) {
                 window.location.href = `${import.meta.env.VITE_API_URL}/api/transport/receipt/${paymentId}`;
               }
@@ -153,6 +171,7 @@ const TransportRegistration = ({ nearestInfo, searchedLocation, onRegisterSucces
               onRegisterSuccess(verifyRes.data.assignment);
             }
           } catch (err) {
+            console.error('[TransportRegistration] Payment verification error:', err);
             toast.error('Payment verification failed');
           }
         },
@@ -163,9 +182,11 @@ const TransportRegistration = ({ nearestInfo, searchedLocation, onRegisterSucces
         theme: { color: "#3b82f6" }
       };
 
+      console.log('[TransportRegistration] Opening Razorpay with options:', options);
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (error) {
+      console.error('[TransportRegistration] Payment initialization error:', error);
       toast.error('Payment initialization failed');
     } finally {
       setPaymentLoading(false);
