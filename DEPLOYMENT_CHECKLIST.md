@@ -10,7 +10,6 @@
 ## Frontend (Render) Environment Variables
 
 - VITE_API_URL: Render backend URL (e.g., https://your-backend.onrender.com)
-- VITE_RAZORPAY_KEY_ID: Razorpay production key ID (same as RAZORPAY_KEY_ID)
 
 ## Deployment Steps
 
