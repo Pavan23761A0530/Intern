@@ -159,20 +159,20 @@ const HostelPage = () => {
     },
   ];
 
-  const facilities = [
-    { icon: MapPin, title: "Location" },
-    { icon: Droplets, title: "RO Drinking Water" },
-    { icon: Waves, title: "Laundry Facility" },
-    { icon: BookOpen, title: "Dedicated Study Hall" },
-    { icon: UtensilsCrossed, title: "Spacious Dining Hall" },
-    { icon: Coffee, title: "Reading Room" },
-    { icon: Gamepad2, title: "Indoor Games Area" },
-    { icon: Camera, title: "CCTV Monitoring" },
-    { icon: Stethoscope, title: "24/7 Medical Care" },
-    { icon: Zap, title: "Power Backup" },
-    { icon: ShieldAlert, title: "Secure Entry/Exit" },
-    { icon: Sparkles, title: "Daily Cleaning" },
-  ];
+const facilities = [
+  { icon: ShieldAlert, title: "Secure Entry/Exit" },
+  { icon: Camera, title: "CCTV Monitoring" },
+  { icon: Stethoscope, title: "24/7 Medical Care" },
+  { icon: Droplets, title: "RO Drinking Water" },
+  { icon: Zap, title: "Power Backup" },
+  { icon: BookOpen, title: "Dedicated Study Hall" },
+  { icon: UtensilsCrossed, title: "Spacious Dining Hall" },
+  { icon: Sparkles, title: "Daily Cleaning" },
+  { icon: Waves, title: "Laundry Facility" },
+  { icon: Coffee, title: "Reading Room" },
+  { icon: MapPin, title: "Prime Location" },
+  { icon: Gamepad2, title: "Indoor Games Area" },
+];
 
   const schedule = [
     { time: "06:00 AM", activity: "Wake up & Yoga/Exercise", icon: Sparkles },
@@ -181,9 +181,7 @@ const HostelPage = () => {
     { time: "01:30 PM", activity: "Healthy Lunch", icon: UtensilsCrossed },
     { time: "04:30 PM", activity: "Evening Snacks & Sports", icon: Gamepad2 },
     { time: "06:30 PM", activity: "Supervised Study Hours", icon: Clock },
-    { time: "08:30 PM", activity: "Dinner Time", icon: UtensilsCrossed },
-    { time: "09:30 PM", activity: "Self Study / Reading", icon: BookOpen },
-    { time: "10:30 PM", activity: "Lights Out", icon: ShieldCheck },
+    { time: "08:30 PM", activity: "Dinner Time", icon: UtensilsCrossed }
   ];
 
   const gallery = [

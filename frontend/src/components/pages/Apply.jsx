@@ -726,7 +726,7 @@ const Apply = () => {
               <p className="text-navy-200 text-lg mb-10 max-w-2xl mx-auto">Safe campus, modern education, caring faculty, and holistic development.</p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button className="w-full sm:w-auto px-10 py-5 bg-gold-500 hover:bg-gold-600 text-navy-900 font-bold rounded-2xl shadow-lg transition-all hover:-translate-y-1">Contact Admission Team</button>
-                <button className="w-full sm:w-auto px-10 py-5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl border border-white/20 backdrop-blur-sm transition-all hover:-translate-y-1">Schedule Campus Visit</button>
+                
               </div>
             </div>
           </div>

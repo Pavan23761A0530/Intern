@@ -184,7 +184,7 @@ const FeePage = () => {
                   </div>
                 </div>
                 <img 
-                  src="https://images.unsplash.com/photo-1555854817-5b2247a8175f?q=80&w=400&auto=format&fit=crop" 
+                  src="Hostel.jpg" 
                   alt="Hostel Room" 
                   className="w-full h-48 object-cover rounded-2xl border border-white/10"
                 />
@@ -298,13 +298,13 @@ const FeePage = () => {
                   <span className="font-bold text-navy-900">Sibling Concession (10% off Tuition)</span>
                 </div>
               </div>
-              <button className="px-8 py-4 bg-navy-900 text-white font-bold rounded-xl hover:bg-navy-800 transition-colors">
-                Inquire for Scholarship
-              </button>
+              <a href="tel:+919876543210" className="inline-block px-8 py-4 bg-navy-900 text-white font-bold rounded-xl hover:bg-navy-800 transition-colors">
+                Enquire for Scholarship
+              </a>
             </div>
             <div className="w-full lg:w-1/2">
               <img 
-                src="https://images.unsplash.com/photo-1544717297-fa154da09f5b?q=80&w=800&auto=format&fit=crop" 
+                src="https://i.pinimg.com/1200x/5a/3e/96/5a3e968fa1d261dca428841970a03f8b.jpg" 
                 alt="Students studying" 
                 className="rounded-[2rem] shadow-2xl"
               />
@@ -404,7 +404,7 @@ const FeePage = () => {
                 <Link to="/apply" className="w-full sm:w-auto px-10 py-5 bg-gold-500 hover:bg-gold-600 text-navy-900 font-bold rounded-2xl shadow-lg shadow-gold-500/20 text-center transition-all hover:-translate-y-1">
                   Apply for Admission
                 </Link>
-                <a href="/#contact" className="w-full sm:w-auto px-10 py-5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl border border-white/20 backdrop-blur-sm text-center transition-all hover:-translate-y-1">
+                <a href="/contact" className="w-full sm:w-auto px-10 py-5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl border border-white/20 backdrop-blur-sm text-center transition-all hover:-translate-y-1">
                   Contact Admission Office
                 </a>
               </div>
