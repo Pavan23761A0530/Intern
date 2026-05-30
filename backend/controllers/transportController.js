@@ -212,7 +212,15 @@ exports.createTransportOrder = async (req, res) => {
     });
     console.log('[TransportController] TransportPayment created');
 
-    res.status(200).json({ success: true, order });
+    // Ensure order has all required fields (currency is guaranteed)
+    const safeOrder = {
+      id: order.id,
+      amount: order.amount,
+      currency: order.currency || "INR",
+      ...order
+    };
+
+    res.status(200).json({ success: true, order: safeOrder });
   } catch (error) {
     console.error('[TransportController] Order creation error:', error);
     res.status(500).json({ success: false, message: error.message });

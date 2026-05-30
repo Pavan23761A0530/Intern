@@ -111,6 +111,13 @@ const TransportRegistration = ({ nearestInfo, searchedLocation, onRegisterSucces
     
     if (!registeredAssignment) {
       console.error('[TransportRegistration] No registered assignment');
+      toast.error('Please register first');
+      return;
+    }
+
+    if (!import.meta.env.VITE_RAZORPAY_KEY_ID) {
+      console.error('[TransportRegistration] Razorpay key missing');
+      toast.error('Payment configuration missing');
       return;
     }
 
@@ -118,9 +125,9 @@ const TransportRegistration = ({ nearestInfo, searchedLocation, onRegisterSucces
     try {
       console.log('[TransportRegistration] Loading Razorpay SDK...');
       const isLoaded = await loadRazorpay();
-      console.log('[TransportRegistration] Razorpay SDK loaded:', isLoaded);
+      console.log('[TransportRegistration] Razorpay SDK loaded:', isLoaded, 'window.Razorpay exists:', !!window.Razorpay);
       
-      if (!isLoaded) {
+      if (!isLoaded || !window.Razorpay) {
         toast.error('Razorpay SDK failed to load');
         return;
       }
@@ -133,7 +140,7 @@ const TransportRegistration = ({ nearestInfo, searchedLocation, onRegisterSucces
       });
       console.log('[TransportRegistration] Order response:', orderRes.data);
 
-      if (!orderRes.data.success) throw new Error('Order creation failed');
+      if (!orderRes.data.success) throw new Error(orderRes.data.message || 'Order creation failed');
 
       const { order } = orderRes.data;
       console.log('[TransportRegistration] Order details:', order);
@@ -145,7 +152,7 @@ const TransportRegistration = ({ nearestInfo, searchedLocation, onRegisterSucces
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
-        currency: order.currency,
+        currency: order.currency || "INR", // Add fallback
         name: "KRR BrightMinds School",
         description: "Transport Fee Payment",
         order_id: order.id,
@@ -161,8 +168,8 @@ const TransportRegistration = ({ nearestInfo, searchedLocation, onRegisterSucces
             if (verifyRes.data.success) {
               toast.success('Payment successful! Transport assigned.');
               
-              // NEW: Trigger professional PDF download from backend
-              const paymentId = verifyRes.data.paymentId || verifyRes.data.assignment?._id; // Fallback logic
+              // Trigger professional PDF download from backend
+              const paymentId = verifyRes.data.paymentId || verifyRes.data.assignment?._id;
               console.log('[TransportRegistration] Downloading receipt for paymentId:', paymentId);
               if (paymentId) {
                 window.location.href = `${import.meta.env.VITE_API_URL}/api/transport/receipt/${paymentId}`;
@@ -172,22 +179,32 @@ const TransportRegistration = ({ nearestInfo, searchedLocation, onRegisterSucces
             }
           } catch (err) {
             console.error('[TransportRegistration] Payment verification error:', err);
-            toast.error('Payment verification failed');
+            toast.error(err.response?.data?.message || 'Payment verification failed');
           }
         },
         prefill: {
           name: formData.studentName,
           contact: formData.studentPhone
         },
-        theme: { color: "#3b82f6" }
+        theme: { color: "#3b82f6" },
+        modal: {
+          ondismiss: () => {
+            console.log('[TransportRegistration] Razorpay modal dismissed');
+            toast.error('Payment cancelled');
+          }
+        }
       };
 
       console.log('[TransportRegistration] Opening Razorpay with options:', options);
       const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response) {
+        console.error('[TransportRegistration] Razorpay payment failed:', response);
+        toast.error(`Payment failed: ${response.error.description}`);
+      });
       rzp.open();
     } catch (error) {
       console.error('[TransportRegistration] Payment initialization error:', error);
-      toast.error('Payment initialization failed');
+      toast.error(error.response?.data?.message || 'Payment initialization failed');
     } finally {
       setPaymentLoading(false);
     }
