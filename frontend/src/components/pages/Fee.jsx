@@ -61,7 +61,7 @@ const FeePage = () => {
         <div 
           className="absolute inset-0 z-0"
           style={{
-            backgroundImage: 'url("public/hero1.jpg")',
+            backgroundImage: 'url("/school.jpg")',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}

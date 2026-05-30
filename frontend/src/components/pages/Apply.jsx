@@ -302,7 +302,7 @@ const Apply = () => {
         <div 
           className="absolute inset-0 z-0"
           style={{
-            backgroundImage: 'url("public/hero1.jpg")',
+            backgroundImage: 'url("public/campus view.jpg")',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
