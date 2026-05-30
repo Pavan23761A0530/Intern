@@ -7,6 +7,7 @@ const HostelPayment = require('../models/HostelPayment');
 const HostelApplication = require('../models/HostelApplication');
 const HostelRoom = require('../models/HostelRoom');
 const HostelStudent = require('../models/HostelStudent');
+const { findAvailableRoom, getAvailabilityStats, normalizeHostelType, normalizeRoomType } = require('../services/hostelAvailabilityService');
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -222,20 +223,16 @@ exports.verifyHostelPayment = async (req, res) => {
       allocatedRoom = existingStudent.hostelDetails.roomNumber;
     } else {
       // ===============================
-      // FIND ROOM
+      // FIND ROOM using the shared service
       // ===============================
+      const room = await findAvailableRoom(application.hostelType, application.roomType);
+      const sessionRoom = await HostelRoom.findById(room._id).session(session);
 
-      const room = await HostelRoom.findOne({
-        hostelType: application.hostelType,
-        roomType: application.roomType,
-        availableBeds: { $gt: 0 }
-      }).session(session);
-
-      if (room) {
-        allocatedRoom = room.roomNumber;
+      if (sessionRoom) {
+        allocatedRoom = sessionRoom.roomNumber;
 
         // Update room number on application
-        application.roomNumber = room.roomNumber;
+        application.roomNumber = sessionRoom.roomNumber;
         await application.save({ session });
 
         // ===============================
@@ -258,19 +255,19 @@ exports.verifyHostelPayment = async (req, res) => {
             address: application.address
           },
           hostelDetails: {
-            room: room._id,
-            roomNumber: room.roomNumber,
-            hostelType: room.hostelType,
-            roomType: room.roomType,
+            room: sessionRoom._id,
+            roomNumber: sessionRoom.roomNumber,
+            hostelType: sessionRoom.hostelType,
+            roomType: sessionRoom.roomType,
             admissionDate: new Date()
           }
         }], { session });
 
         // UPDATE ROOM
-        room.studentsAssigned.push(student[0]._id);
-        room.occupiedBeds += 1;
-        room.availableBeds = room.totalBeds - room.occupiedBeds;
-        await room.save({ session });
+        sessionRoom.studentsAssigned.push(student[0]._id);
+        sessionRoom.occupiedBeds += 1;
+        sessionRoom.availableBeds = sessionRoom.totalBeds - sessionRoom.occupiedBeds;
+        await sessionRoom.save({ session });
       }
     }
 
@@ -282,32 +279,8 @@ exports.verifyHostelPayment = async (req, res) => {
     // ===============================
     const io = req.app.get('io');
     if (io) {
-      // Get updated hostel stats
-      const hostelStats = await HostelRoom.aggregate([
-        {
-          $group: {
-            _id: { hostelType: "$hostelType", roomType: "$roomType" },
-            totalBeds: { $sum: "$totalBeds" },
-            occupiedBeds: { $sum: "$occupiedBeds" },
-            availableBeds: { $sum: "$availableBeds" },
-            roomCount: { $sum: 1 }
-          }
-        }
-      ]);
-
-      const formattedHostelStats = {
-        boys: { ac: 0, nonAc: 0 },
-        girls: { ac: 0, nonAc: 0 }
-      };
-      hostelStats.forEach(stat => {
-        const hostelTypeLower = stat._id.hostelType.toLowerCase();
-        const roomTypeLower = stat._id.roomType.toLowerCase();
-        const key = roomTypeLower.includes('non') ? 'nonAc' : 'ac';
-        if (formattedHostelStats[hostelTypeLower]) {
-          formattedHostelStats[hostelTypeLower][key] = stat.availableBeds;
-        }
-      });
-
+      // Get updated hostel stats using the shared service
+      const formattedHostelStats = await getAvailabilityStats();
       io.emit('hostelAvailabilityUpdate', formattedHostelStats);
     }
 

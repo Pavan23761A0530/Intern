@@ -1,5 +1,6 @@
 const HostelRoom = require('../models/HostelRoom');
 const HostelStudent = require('../models/HostelStudent');
+const { getAvailabilityStats, normalizeHostelType, normalizeRoomType } = require('../services/hostelAvailabilityService');
 
 // @desc    Get all hostel rooms
 // @route   GET /api/hostel/rooms
@@ -9,8 +10,22 @@ exports.getHostelRooms = async (req, res) => {
     const { hostelType, roomType, available } = req.query;
     let query = {};
 
-    if (hostelType) query.hostelType = hostelType;
-    if (roomType) query.roomType = roomType;
+    if (hostelType) {
+      const normalized = normalizeHostelType(hostelType);
+      query = {
+        ...query,
+        $expr: { $eq: [{ $toLower: "$hostelType" }, normalized] }
+      };
+    }
+    
+    if (roomType) {
+      const normalized = normalizeRoomType(roomType);
+      query = {
+        ...query,
+        $expr: { $eq: [{ $toLower: "$roomType" }, normalized] }
+      };
+    }
+    
     if (available === 'true') query.availableBeds = { $gt: 0 };
 
     const rooms = await HostelRoom.find(query).populate('studentsAssigned', 'studentName studentClass');
@@ -21,6 +36,7 @@ exports.getHostelRooms = async (req, res) => {
       data: rooms
     });
   } catch (err) {
+    console.error('[HostelController] getHostelRooms error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 };
@@ -31,48 +47,8 @@ exports.getHostelRooms = async (req, res) => {
 exports.getHostelStats = async (req, res) => {
   console.log('[HostelController] getHostelStats called');
   try {
-    console.log('[MongoDB] Running aggregation for hostel stats...');
-    const stats = await HostelRoom.aggregate([
-      {
-        $group: {
-          _id: { hostelType: "$hostelType", roomType: "$roomType" },
-          totalBeds: { $sum: "$totalBeds" },
-          occupiedBeds: { $sum: "$occupiedBeds" },
-          availableBeds: { $sum: "$availableBeds" },
-          roomCount: { $sum: 1 }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          hostelType: "$_id.hostelType",
-          roomType: "$_id.roomType",
-          totalBeds: 1,
-          occupiedBeds: 1,
-          availableBeds: 1,
-          roomCount: 1
-        }
-      }
-    ]);
-    console.log('[MongoDB] Aggregation result:', stats);
-
-    // Format stats for easier frontend consumption - match what frontend expects
-    const formattedStats = {
-      boys: { ac: 0, nonAc: 0 },
-      girls: { ac: 0, nonAc: 0 }
-    };
-
-    stats.forEach(stat => {
-      console.log('[HostelController] Processing stat:', stat);
-      const hostelTypeLower = stat.hostelType.toLowerCase();
-      const roomTypeLower = stat.roomType.toLowerCase();
-      const key = roomTypeLower.includes('non') ? 'nonAc' : 'ac';
-      
-      if (formattedStats[hostelTypeLower]) {
-        formattedStats[hostelTypeLower][key] = stat.availableBeds;
-      }
-    });
-
+    const formattedStats = await getAvailabilityStats();
+    
     console.log('[HostelController] Formatted stats:', formattedStats);
     console.log('[Response] Sending response:', { success: true, data: formattedStats });
     res.status(200).json({

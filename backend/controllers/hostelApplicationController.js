@@ -1,25 +1,23 @@
 const HostelApplication = require('../models/HostelApplication');
 const HostelRoom = require('../models/HostelRoom');
+const { hasAvailableBeds, normalizeHostelType, normalizeRoomType } = require('../services/hostelAvailabilityService');
 
 // @desc    Submit hostel application
 // @route   POST /api/hostel-applications
 // @access  Public
 exports.submitApplication = async (req, res) => {
+  console.log('[HostelApplication] submitApplication called with:', req.body);
   try {
     const applicationData = { ...req.body };
     
     // Normalize to lowercase for schema consistency
-    if (applicationData.hostelType) applicationData.hostelType = applicationData.hostelType.toLowerCase();
-    if (applicationData.roomType) applicationData.roomType = applicationData.roomType.toLowerCase();
+    if (applicationData.hostelType) applicationData.hostelType = normalizeHostelType(applicationData.hostelType);
+    if (applicationData.roomType) applicationData.roomType = normalizeRoomType(applicationData.roomType);
 
-    // 1. Check bed availability before applying
-    const availableRooms = await HostelRoom.find({
-      hostelType: applicationData.hostelType,
-      roomType: applicationData.roomType,
-      availableBeds: { $gt: 0 }
-    });
+    // 1. Check bed availability before using the shared service
+    const isAvailable = await hasAvailableBeds(applicationData.hostelType, applicationData.roomType);
 
-    if (availableRooms.length === 0) {
+    if (!isAvailable) {
       return res.status(400).json({
         success: false,
         error: `Currently, no beds are available in the ${applicationData.hostelType} ${applicationData.roomType} category. Please contact the office for waiting list details.`
@@ -34,6 +32,7 @@ exports.submitApplication = async (req, res) => {
       data: application
     });
   } catch (err) {
+    console.error('[HostelApplication] submitApplication error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 };
