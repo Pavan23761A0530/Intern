@@ -1,0 +1,52 @@
+services:
+  # Backend API Service
+  - type: web
+    name: krr-school-backend
+    env: node
+    plan: starter
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        fromDatabase:
+          name: krr-school-db
+          property: connectionString
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: krr-school-frontend
+          envVarKey: RENDER_EXTERNAL_URL
+    healthCheckPath: /api/health
+
+  # Frontend Static Site
+  - type: web
+    name: krr-school-frontend
+    env: static
+    plan: starter
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: krr-school-backend
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: VITE_RAZORPAY_KEY_ID
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+# Optional: Define a MongoDB database (if not using Atlas)
+# databases:
+#   - name: krr-school-db
+#     databaseName: krr_school
+#     user: krr_school_user
+#     plan: starter
